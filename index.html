@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#153e51">
-  <meta name="description" content="ForceWAM learns contact responses from the actions and outcomes recorded in task-agnostic play, guided by visual-wrench futures learned from successful demonstrations.">
+  <meta name="description" content="ForceWAM connects task-agnostic contact experience to task-directed manipulation through visual-wrench futures learned from successful demonstrations.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="ForceWAM — Learning from Demo and Play">
-  <meta property="og:description" content="Play need not solve a task to teach contact responses. ForceWAM learns task-compatible futures from demonstrations and execution from task and play.">
+  <meta property="og:description" content="Successful demonstrations guide task-compatible futures; task and play teach contact execution. ForceWAM connects the two through visual-wrench futures.">
   <title>ForceWAM: Decoupling Future and Response Learning from Demo and Play Data for Contact-Rich Manipulation</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=20261009-play">
+  <link rel="stylesheet" href="styles.css?v=20261012-motivation">
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -64,18 +64,12 @@
     <section class="section section-tinted" id="motivation" aria-labelledby="motivation-heading">
       <div class="prose-container">
         <p class="eyebrow">The play insight</p>
-        <h2 id="motivation-heading">Useful supervision beyond<br>successful demonstrations.</h2>
-        <p class="motivation-opening">Successful demonstrations show how motion and force evolve along a task-solving trajectory. A successful push, for example, may reveal little about how the load changes when the robot presses farther or backs away. Exploratory pressing, sliding, and release in <strong>task-agnostic play</strong> provide additional experience of these action–contact responses.</p>
+        <h2 id="motivation-heading">From task-agnostic play<br>to task-directed manipulation.</h2>
+        <p class="motivation-opening">Contact-rich manipulation requires learning both which interactions accomplish a task and how to realize them as contact conditions evolve. Successful demonstrations provide examples of task-compatible motion and force, but may offer limited coverage of local action–contact responses. A successful push, for example, need not reveal how force changes when the robot presses farther or backs away.</p>
         <div class="insight-statement">
-          <h3>Learn actions conditioned on the interaction they produced.</h3>
-          <p>A play segment records actions together with the visual and force changes that followed. Given the current observation and this <strong>recorded visual-wrench future</strong>, the actions from the same segment provide a training target for the inverse dynamics model—even when the segment does not accomplish the task.</p>
+          <p><strong>Task-agnostic play</strong> provides complementary experience through exploratory pressing, sliding, and release. These interactions need not complete a task to reveal useful relationships between actions, motion, and contact. This raises a central question: <strong>how can experience collected without the downstream task instruction help a robot execute the interactions that the task requires?</strong></p>
         </div>
-        <div class="transition-example" role="group" aria-label="Inverse dynamics supervision from one recorded task or play segment">
-          <div><p class="transition-label">Condition</p><p>Current observation<br><span class="transition-plus">+</span> Recorded visual-wrench future</p></div>
-          <div><p class="transition-label">Action target</p><p>Action sequence from<br>the same recorded segment</p></div>
-        </div>
-        <p class="motivation-bridge">ForceWAM assigns the choice of task-compatible futures to <strong>ForceWM, trained on successful demonstrations</strong>. The IDM learns execution from recorded task and play interactions. At deployment, ForceWM supplies the future for the IDM to realize, allowing the robot to draw on broader contact experience while pursuing the task.</p>
-        <p class="motivation-contact">The future specifies both <strong>how the scene should change</strong> and <strong>how contact forces should evolve</strong>. This gives the IDM a reference for motion and contact together.</p>
+        <p class="motivation-bridge"><strong>ForceWAM makes this connection through visual–wrench futures.</strong> ForceWM learns task-compatible futures from successful demonstrations, jointly describing anticipated motion and contact loading. An inverse dynamics model learns from both demonstrations and play to predict actions conditioned on each segment’s recorded visual–wrench future. At deployment, generated futures supply task-conditioned references, while newly measured wrench feedback supports reactive action updates. This allows play to contribute to contact execution even when its trajectories do not demonstrate a task solution.</p>
         <details class="abstract-details" id="abstract"><summary id="abstract-heading">Read the full abstract</summary>
         <p class="abstract-text">Expert demonstrations show how to complete contact-rich tasks, but provide limited coverage of how interaction forces respond to different actions. Task-agnostic play provides broader experience of contact dynamics without specifying task goals. To fully leverage these two types of data, we introduce <strong>ForceWAM</strong>, a force world action model that decouples knowledge of task-compatible interaction outcomes from knowledge of how local actions change contact. A world model learns from successful demonstrations to jointly predict future video and six-axis force/torque trajectories. Together, these futures describe the expected evolution of motion and contact during the task. A separate inverse dynamics model (IDM) learns from both task and play, mapping current observations and recorded visual-wrench futures to their associated robot actions. Play data thus provide knowledge of force responses for goal-directed execution. At deployment, the IDM reactively translates generated futures into actions, reusing them with fresh wrench feedback between world-model updates. Across real-robot force-regulated sliding, box flipping with and without disturbances, and ring placement, ForceWAM achieves <strong>85–95% mean success</strong>, surpassing world-modeling and reactive baselines. Our experiments further show that adding task-agnostic play data improves success by <strong>15–45 percentage points</strong>, demonstrating its value for learning contact-rich execution.</p>
         </details>
@@ -88,6 +82,13 @@
         <article><span class="step-number">01 / TASK DEMONSTRATIONS</span><h3>Learn task-compatible futures</h3><p><strong>ForceWM</strong> learns from successful demonstrations to jointly generate future wrist-camera video and six-axis wrench trajectories. The current observation and task instruction guide the interaction it predicts.</p></article>
         <article><span class="step-number">02 / TASK + PLAY</span><h3>Learn actions from observed outcomes</h3><p>The <strong>inverse dynamics model</strong> learns from current observations, recorded visual-wrench futures, and the associated actions. Play expands this execution supervision with interactions that need not demonstrate task success.</p></article>
         <article><span class="step-number">03 / ONLINE EXECUTION</span><h3>Realize task futures with force feedback</h3><p>ForceWM supplies a task-compatible future to the IDM trained on task and play. The <strong>causal, slow–fast executor</strong> reuses that future while updating actions with newly measured wrench feedback.</p></article>
+      </div>
+      <div class="method-supervision">
+        <h3 id="supervision-heading">Inverse dynamics supervision from task and play</h3>
+        <div class="transition-example" role="group" aria-labelledby="supervision-heading">
+          <div><p class="transition-label">Condition</p><p>Current observation<br><span class="transition-plus">+</span> Recorded visual-wrench future</p></div>
+          <div><p class="transition-label">Action target</p><p>Action sequence from<br>the same recorded segment</p></div>
+        </div>
       </div>
       <figure class="paper-figure"><a href="assets/figures/method.pdf" target="_blank" rel="noopener" aria-label="Open the ForceWAM architecture figure as a PDF"><img src="assets/images/method.png" width="2400" height="1047" loading="lazy" alt="ForceWAM architecture: task demonstrations train the future generator; task and play train the inverse dynamics model; online execution combines generated futures and measured wrench feedback."></a><figcaption><strong>Training and deployment.</strong> ForceWM predicts a visual-wrench future from task demonstrations. The IDM learns from recorded futures and actions in both task and play data, then executes generated futures with measured contact feedback. Select the figure to open the full-resolution PDF.</figcaption></figure>
       <details class="figure-details"><summary>View the paper’s conceptual comparison</summary><figure class="paper-figure"><a href="assets/figures/overview.pdf" target="_blank" rel="noopener"><img src="assets/images/overview.png" width="2800" height="889" loading="lazy" alt="The paper's motivation figure compares force-conditioned policies, force-envisioned policies, and ForceWAM's separate future and response learning."></a><figcaption>The manuscript’s conceptual comparison and real-robot results. ForceWAM assigns task-compatible future learning and local execution learning to separate modules.</figcaption></figure></details>
